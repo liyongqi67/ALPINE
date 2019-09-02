@@ -122,8 +122,9 @@ def getValBatch(batchSize,num):
 def eva(sess,model):
                 valLoop=len(val_interaction_data)/val_batchsize
                 valLoop=int(valLoop)
+                result=[]
+                result_ans=[]
 
-                auc=0
                 print("start eva")
                 for valNum in tqdm(range(valLoop)):
                     label,pos_input,pos_mask_input,pos_edge_input,neg_input,neg_mask_input,neg_edge_input,item_input,user_id_input=getValBatch(val_batchsize,valNum)
@@ -142,16 +143,11 @@ def eva(sess,model):
                            model.user_id_inputs:user_id_input,
                            model.tst: True, 
                            model.keep_prob: 1.0})
-
-                    try:
-                        auc=auc+roc_auc_score(label,y_predVal)
-                    except ValueError:
-                        print(valNum)
-                return auc/valLoop
-
-
+                    result.extend(y_predVal)
+                    result_ans.extend(label)
+                return roc_auc_score(result_ans,result)
 # Placeholders for input, output and dropout
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 config = tf.ConfigProto()
 #config.gpu_options.allow_growth = True 
 sess = tf.InteractiveSession(config=config)
@@ -170,12 +166,14 @@ sess.run(tf.global_variables_initializer())
 
 saver = tf.train.Saver()
 
-#saver.restore(sess,  "./model_save/model.ckpt")
-
+saver.restore(sess,  "./model_save/model.ckpt")
+auc_eva=eva(sess,model)
+print(auc_eva)
 with open(time+".txt", "a") as f:
 
     bestPerformance=0.0
     best_auceva=0
+    auc_eva=eva(sess,model)
     for epoch in range(10000000):
         num=len(train_interaction_data)/train_batchSize
         num=int(num)

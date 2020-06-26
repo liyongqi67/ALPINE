@@ -47,7 +47,7 @@ user_em=np.load("/home/share/liyongqi/kuaishou/process_data4/user_like.npy")
 print(user_em.shape)
 with open("/home/share/liyongqi/kuaishou/process_data4/dataset.pkl", 'rb') as f:
   train_interaction_data= pickle.load(f)
-  val_interaction_data= pickle.load(f)
+  test_interaction_data= pickle.load(f)
   pos_his_data= pickle.load(f)
   neg_his_data=pickle.load(f)
   pos_edge_data=pickle.load(f)
@@ -98,11 +98,11 @@ def getValBatch(batchSize,num):
         item_input=np.zeros([batchSize],dtype=np.int)
         user_id_input=np.zeros([batchSize],dtype=np.int)
         for i in range(num*batchSize,(num+1)*batchSize):
-             user_id=val_interaction_data[i][0][0]
-             pos_len=val_interaction_data[i][1]
-             neg_len=val_interaction_data[i][2]
+             user_id=test_interaction_data[i][0][0]
+             pos_len=test_interaction_data[i][1]
+             neg_len=test_interaction_data[i][2]
 
-             label[i%batchSize]=val_interaction_data[i][0][2]
+             label[i%batchSize]=test_interaction_data[i][0][2]
              pos_input[i%batchSize]=pos_his_data[user_id][:pos_len]+[len(visual)-1]*(max(timestep,pos_len)-pos_len)
              pos_mask_input[i%batchSize]=pos_len
              pos_edge_input[i%batchSize]=pos_edge_data[user_id][:pos_len]+[0]*(max(timestep,pos_len)-pos_len)
@@ -111,7 +111,7 @@ def getValBatch(batchSize,num):
              neg_mask_input[i%batchSize]=neg_len
              neg_edge_input[i%batchSize]=neg_edge_data[user_id][:neg_len]+[0]*(max(timestep,neg_len)-neg_len)
 
-             item_input[i%batchSize]=val_interaction_data[i][0][1]
+             item_input[i%batchSize]=test_interaction_data[i][0][1]
              user_id_input[i%batchSize]=user_id
 
 
@@ -120,7 +120,7 @@ def getValBatch(batchSize,num):
         return label,pos_input,pos_mask_input,pos_edge_input.reshape([-1,timestep,1]),neg_input,neg_mask_input,neg_edge_input.reshape([-1,timestep,1]),item_input,user_id_input
 
 def eva(sess,model):
-                valLoop=len(val_interaction_data)/val_batchsize
+                valLoop=len(test_interaction_data)/val_batchsize
                 valLoop=int(valLoop)
                 result=[]
                 result_ans=[]

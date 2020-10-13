@@ -12,11 +12,10 @@ for i in range(len(ground_truth)):
 
 
 
-recall=0
-precision=0
-f1=0
-
 for K in range(1,11):
+    recall=0
+    precision=0
+    f1=0
     for key in user_click:
         user_click[key].sort(key=lambda x:-x[1])
         
